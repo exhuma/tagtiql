@@ -1,11 +1,14 @@
-import sqlite3
+from sqlite3 import IntegrityError, connect
 from hashlib import md5
-from os.path import abspath, dirname, join, exists, basename
+from os.path import abspath, dirname, join, exists, basename, isdir
+from os import walk
 
 DB_VERSION=1
 
+IGNORED_FOLDERS = ['CVS', '.svn', '.git']
+
 def init_db(dbname):
-    connection = sqlite3.connect( dbname )
+    connection = connect( dbname )
 
     c = connection.cursor()
     c.execute('''CREATE TABLE file (
@@ -27,19 +30,31 @@ def init_db(dbname):
     connection.commit()
     c.close()
 
+def tag_folder(root_folder, tags):
+    for root, dirs, files in walk(root_folder):
+        for file in files:
+            tag( join(root, file), tags )
+        for ignored_folder in IGNORED_FOLDERS:
+            if ignored_folder in dirs:
+                dirs.remove(ignored_folder)  # don't visit CVS directories
+
 def tag(filename, tags):
-    dbname = join( dirname( abspath( filename ) ), 'swarmtags.sqlite3' )
 
     if not exists(filename):
-        print "File not found"
+        print "File %r not found" % filename
         return
 
+    # convert a string into a list of tags (splitting by commas)
     if isinstance(tags, basestring):
         tags = tags.split(",")
 
-    # what we want is a set of tags. not a list!
-    # this remove duplicates as a side effect
+    # Clean up tags. Strip leading and trailing whitespace and remove duplicates.
     tags = set([ x.strip() for x in tags ])
+
+    # if a tag is requested on a folder we will recurse into the folder and tag all files.
+    if isdir(filename):
+       tag_folder(filename, tags)
+       return
 
     try:
         hash = md5( open(filename).read() ).hexdigest()
@@ -47,11 +62,12 @@ def tag(filename, tags):
         print "Unable to open file '%s' for hashing. Aborting..." % filename
         raise
 
+    dbname = join( dirname( abspath( filename ) ), 'swarmtags.sqlite3' )
     # initialise a non-existent DB
     if not exists(dbname):
         init_db(dbname)
 
-    conn = sqlite3.connect( dbname )
+    conn = connect( dbname )
     c = conn.cursor()
 
     try:
