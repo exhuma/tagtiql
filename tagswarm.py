@@ -1,6 +1,6 @@
 import sqlite3
 from hashlib import md5
-from os.path import abspath, dirname, join, exists
+from os.path import abspath, dirname, join, exists, basename
 
 DB_VERSION=1
 
@@ -10,7 +10,7 @@ def init_db(dbname):
     c = connection.cursor()
     c.execute('''CREATE TABLE file (
     hash text PRIMARY KEY,
-    abspath text)''')
+    name text)''')
 
     c.execute('''CREATE TABLE file_tags(
         hash text REFERENCES file(hash) ON DELETE CASCADE,
@@ -24,8 +24,6 @@ def init_db(dbname):
     # Let's store the DB revision number so we can ensure compatibility
     c.execute( 'INSERT INTO system (var, val) VALUES (?,?)', ('db_version', DB_VERSION) )
 
-    # Also keep the path of the tagged file, in order to detect swarmtag storage movements
-    c.execute( 'INSERT INTO system (var, val) VALUES (?,?)', ('root_path', dirname( abspath( dbname ) )) )
     connection.commit()
     c.close()
 
@@ -57,8 +55,8 @@ def tag(filename, tags):
     c = conn.cursor()
 
     try:
-        c.execute("INSERT INTO file (hash, abspath) VALUES (?, ?)",
-            (hash, abspath(filename)))
+        c.execute("INSERT INTO file (hash, name) VALUES (?, ?)",
+            (hash, basename(filename)))
     except IntegrityError, ex:
         # duplicate entry
         pass
