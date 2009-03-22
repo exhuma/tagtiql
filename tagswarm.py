@@ -1,9 +1,8 @@
 from sqlite3 import IntegrityError, connect
-from hashlib import md5
 from os.path import abspath, dirname, join, exists, basename, isdir
 from os import walk
 
-DB_VERSION=1
+DB_VERSION=2
 IGNORED_FOLDERS = ['CVS', '.svn', '.git']
 OP_ADD_TAG    = 1
 OP_REMOVE_TAG = 2
@@ -12,14 +11,10 @@ def init_db(dbname):
     connection = connect( dbname )
 
     c = connection.cursor()
-    c.execute('''CREATE TABLE file (
-    hash text PRIMARY KEY,
-    name text)''')
-
     c.execute('''CREATE TABLE file_tags(
-        hash text REFERENCES file(hash) ON DELETE CASCADE,
+        file_name text,
         tag text,
-    PRIMARY KEY (hash, tag))''')
+    PRIMARY KEY (file_name, tag))''')
 
     c.execute('''CREATE TABLE system(
         var text PRIMARY KEY,
@@ -57,12 +52,6 @@ def tag_path(path, tags, op=OP_ADD_TAG):
        tag_folder(path, tags, op)
        return
 
-    try:
-        hash = md5( open(path).read() ).hexdigest()
-    except IOError, ex:
-        print "Unable to open file '%s' for hashing. Aborting..." % path
-        raise
-
     dbname = join( dirname( abspath( path ) ), 'swarmtags.sqlite3' )
     # initialise a non-existent DB
     if not exists(dbname):
@@ -71,19 +60,12 @@ def tag_path(path, tags, op=OP_ADD_TAG):
     conn = connect( dbname )
     c = conn.cursor()
 
-    try:
-        c.execute("INSERT INTO file (hash, name) VALUES (?, ?)",
-            (hash, basename(path)))
-    except IntegrityError, ex:
-        # duplicate entry
-        pass
-
     for tag in tags:
         try:
             if op == OP_ADD_TAG:
-               c.execute("INSERT INTO file_tags (hash, tag) VALUES (?, ?)", (hash, tag))
+               c.execute("INSERT INTO file_tags (file_name, tag) VALUES (?, ?)", (basename(path), tag))
             elif op == OP_REMOVE_TAG:
-               c.execute("DELETE FROM file_tags WHERE hash=? and tag=?", (hash, tag))
+               c.execute("DELETE FROM file_tags WHERE file_name=? and tag=?", (basename(path), tag))
         except IntegrityError, ex:
             # duplicate entry
             pass
