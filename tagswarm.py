@@ -11,19 +11,19 @@ def init_db(dbname):
     c.execute('''CREATE TABLE file (
     hash text PRIMARY KEY,
     abspath text)''')
-    
+
     c.execute('''CREATE TABLE file_tags(
         hash text REFERENCES file(hash) ON DELETE CASCADE,
-        tag text, 
+        tag text,
     PRIMARY KEY (hash, tag))''')
-    
+
     c.execute('''CREATE TABLE system(
         var text PRIMARY KEY,
         val text);''')
-    
+
     # Let's store the DB revision number so we can ensure compatibility
     c.execute( 'INSERT INTO system (var, val) VALUES (?,?)', ('db_version', DB_VERSION) )
-    
+
     # Also keep the path of the tagged file, in order to detect swarmtag storage movements
     c.execute( 'INSERT INTO system (var, val) VALUES (?,?)', ('root_path', dirname( abspath( dbname ) )) )
     connection.commit()
@@ -31,14 +31,14 @@ def init_db(dbname):
 
 def tag(filename, tags):
     dbname = join( dirname( abspath( filename ) ), 'swarmtags.sqlite3' )
-    
+
     if not exists(filename):
         print "File not found"
         return
 
     if isinstance(tags, basestring):
         tags = tags.split(",")
-    
+
     # what we want is a set of tags. not a list!
     # this remove duplicates as a side effect
     tags = set([ x.strip() for x in tags ])
