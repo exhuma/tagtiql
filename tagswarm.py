@@ -33,15 +33,15 @@ def init_db(dbname):
 def tag_folder(root_folder, tags):
     for root, dirs, files in walk(root_folder):
         for file in files:
-            add_tags( join(root, file), tags )
+            tag( join(root, file), tags )
         for ignored_folder in IGNORED_FOLDERS:
             if ignored_folder in dirs:
                 dirs.remove(ignored_folder)  # don't visit CVS directories
 
-def add_tags(path, tags):
+def tag(filename, tags):
 
-    if not exists(path):
-        print "File %r not found" % path
+    if not exists(filename):
+        print "File %r not found" % filename
         return
 
     # convert a string into a list of tags (splitting by commas)
@@ -52,17 +52,17 @@ def add_tags(path, tags):
     tags = set([ x.strip() for x in tags ])
 
     # if a tag is requested on a folder we will recurse into the folder and tag all files.
-    if isdir(path):
-       tag_folder(path, tags)
+    if isdir(filename):
+       tag_folder(filename, tags)
        return
 
     try:
-        hash = md5( open(path).read() ).hexdigest()
+        hash = md5( open(filename).read() ).hexdigest()
     except IOError, ex:
-        print "Unable to open file '%s' for hashing. Aborting..." % path
+        print "Unable to open file '%s' for hashing. Aborting..." % filename
         raise
 
-    dbname = join( dirname( abspath( path ) ), 'swarmtags.sqlite3' )
+    dbname = join( dirname( abspath( filename ) ), 'swarmtags.sqlite3' )
     # initialise a non-existent DB
     if not exists(dbname):
         init_db(dbname)
@@ -72,7 +72,7 @@ def add_tags(path, tags):
 
     try:
         c.execute("INSERT INTO file (hash, name) VALUES (?, ?)",
-            (hash, basename(path)))
+            (hash, basename(filename)))
     except IntegrityError, ex:
         # duplicate entry
         pass
@@ -89,4 +89,4 @@ def add_tags(path, tags):
 
 if __name__ == "__main__":
     import sys
-    add_tags(sys.argv[1], sys.argv[2:])
+    tag(sys.argv[1], sys.argv[2:])
