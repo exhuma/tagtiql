@@ -31,6 +31,7 @@ clean:
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) .
+	./fixgithub.sh
 	@echo
 	@echo "Build finished. The HTML pages are created."
 
