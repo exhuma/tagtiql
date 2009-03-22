@@ -54,6 +54,7 @@ def tag_path(path, tags, op=OP_ADD_TAG):
 
     dbname = join( dirname( abspath( path ) ), 'swarmtags.sqlite3' )
     # initialise a non-existent DB
+    #todo# This conditional might be put into the init_db method
     if not exists(dbname):
         init_db(dbname)
 

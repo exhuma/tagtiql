@@ -2,3 +2,6 @@
 .*.swp
 *~
 swarmtags.sqlite3
+ui/*.py*
+swarm_cache.sqlite3
+
