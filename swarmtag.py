@@ -14,13 +14,9 @@ def init_db(dbname):
     
     c.execute('''CREATE TABLE file_tags(
         hash text REFERENCES file(hash) ON DELETE CASCADE,
-        tag_id integer REFERENCES tag(tag_id) ON DELETE CASCADE,
-    PRIMARY KEY (hash, tag_id))''')
+        tag text, 
+    PRIMARY KEY (hash, tag))''')
     
-    c.execute('''CREATE TABLE tag(
-        tag_id integer PRIMARY KEY,
-        tag text);''')
-
     c.execute('''CREATE TABLE system(
         var text PRIMARY KEY,
         val text);''')
@@ -59,14 +55,21 @@ def tag(filename, tags):
 
     conn = sqlite3.connect( dbname )
     c = conn.cursor()
+
     try:
         c.execute("INSERT INTO file (hash, abspath) VALUES (?, ?)",
             (hash, abspath(filename)))
     except IntegrityError, ex:
         # duplicate entry
         pass
-    for tag in tags:
 
+    for tag in tags:
+        try:
+            c.execute("INSERT INTO file_tags (hash, tag) VALUES (?, ?)", (hash, tag))
+        except IntegrityError, ex:
+            # duplicate entry
+            pass
+    conn.commit()
     c.close()
 
 if __name__ == "__main__":
