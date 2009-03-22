@@ -4,8 +4,9 @@ from os.path import abspath, dirname, join, exists, basename, isdir
 from os import walk
 
 DB_VERSION=1
-
 IGNORED_FOLDERS = ['CVS', '.svn', '.git']
+OP_ADD_TAG    = 1
+OP_REMOVE_TAG = 2
 
 def init_db(dbname):
     connection = connect( dbname )
@@ -30,15 +31,15 @@ def init_db(dbname):
     connection.commit()
     c.close()
 
-def tag_folder(root_folder, tags):
+def tag_folder(root_folder, tags, op=OP_ADD_TAG):
     for root, dirs, files in walk(root_folder):
         for file in files:
-            tag( join(root, file), tags )
+            tag_path( join(root, file), tags, op )
         for ignored_folder in IGNORED_FOLDERS:
             if ignored_folder in dirs:
                 dirs.remove(ignored_folder)  # don't visit CVS directories
 
-def tag_path(path, tags):
+def tag_path(path, tags, op=OP_ADD_TAG):
 
     if not exists(path):
         print "File %r not found" % path
@@ -53,7 +54,7 @@ def tag_path(path, tags):
 
     # if a tag is requested on a folder we will recurse into the folder and tag all files.
     if isdir(path):
-       tag_folder(path, tags)
+       tag_folder(path, tags, op)
        return
 
     try:
@@ -79,7 +80,10 @@ def tag_path(path, tags):
 
     for tag in tags:
         try:
-            c.execute("INSERT INTO file_tags (hash, tag) VALUES (?, ?)", (hash, tag))
+            if op == OP_ADD_TAG:
+               c.execute("INSERT INTO file_tags (hash, tag) VALUES (?, ?)", (hash, tag))
+            elif op == OP_REMOVE_TAG:
+               c.execute("DELETE FROM file_tags WHERE hash=? and tag=?", (hash, tag))
         except IntegrityError, ex:
             # duplicate entry
             pass
@@ -89,4 +93,7 @@ def tag_path(path, tags):
 
 if __name__ == "__main__":
     import sys
-    tag(sys.argv[1], sys.argv[2:])
+    op = int(sys.argv[2])
+    if op not in [1,2]:
+       raise ValueError("Operation must be either 1 (add tags) or 2 (remove tags)")
+    tag_path(sys.argv[1], sys.argv[3:], op)
