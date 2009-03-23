@@ -7,6 +7,7 @@ DB_VERSION=2
 IGNORED_FOLDERS = ['CVS', '.svn', '.git']
 OP_ADD_TAG    = 1
 OP_REMOVE_TAG = 2
+SEARCH_CONJUNCTIVE = 1
 
 def init_db(dbname):
     try:
@@ -38,6 +39,38 @@ def tag_folder(root_folder, tags, op=OP_ADD_TAG):
         for ignored_folder in IGNORED_FOLDERS:
             if ignored_folder in dirs:
                 dirs.remove(ignored_folder)  # don't visit CVS directories
+
+def fast_search(root_folder, tags, op=SEARCH_CONJUNCTIVE):
+    """
+    Quickly search through the tags. This does not build a global tag index but
+    instead queries tag-stores as it encounters them in the directory.
+
+    It's implemented as a generator method. This alows on-the-fly search.
+    """
+    for root, dirs, files in walk(root_folder):
+        for file in files:
+            if file != "swarmtags.sqlite3":
+                continue
+            dbname = join( root, file )
+            try:
+
+                conn = connect( dbname )
+            except OperationalError, ex: 
+                sys.stderr.write( "Unable to connect to the database %r. Errormessage was: %s\n" % ( dbname, str(ex) ) )
+                continue
+
+            c = conn.cursor()
+
+            subselects = [ "SELECT file_name FROM file_tags WHERE tag=?" for x in tags ]
+            compound_q = " INTERSECT ".join( subselects )
+            compound_q += " ORDER BY file_name"
+            c.execute( compound_q, tags )
+
+            for row in c:
+                yield join( root, row[0] )
+
+            c.close()
+            conn.close()
 
 def tag_path(path, tags, op=OP_ADD_TAG):
 
