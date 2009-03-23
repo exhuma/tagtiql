@@ -1,6 +1,7 @@
-from sqlite3 import IntegrityError, connect
+from sqlite3 import IntegrityError, OperationalError, connect
 from os.path import abspath, dirname, join, exists, basename, isdir
 from os import walk
+import sys
 
 DB_VERSION=2
 IGNORED_FOLDERS = ['CVS', '.svn', '.git']
@@ -8,7 +9,11 @@ OP_ADD_TAG    = 1
 OP_REMOVE_TAG = 2
 
 def init_db(dbname):
-    connection = connect( dbname )
+    try:
+       connection = connect( dbname )
+    except OperationalError, ex:
+       sys.stderr.write( "Unable to connect to the database %r. Errormessage was: %s\n" % ( dbname, str(ex) ) )
+       return
 
     c = connection.cursor()
     c.execute('''CREATE TABLE file_tags(
@@ -36,6 +41,10 @@ def tag_folder(root_folder, tags, op=OP_ADD_TAG):
 
 def tag_path(path, tags, op=OP_ADD_TAG):
 
+    if basename(path) == "swarmtags.sqlite3":
+        # Avoid the tag DB itself to be tagged
+        return
+
     if not exists(path):
         print "File %r not found" % path
         return
@@ -58,7 +67,12 @@ def tag_path(path, tags, op=OP_ADD_TAG):
     if not exists(dbname):
         init_db(dbname)
 
-    conn = connect( dbname )
+    try:
+       conn = connect( dbname )
+    except OperationalError, ex:
+       sys.stderr.write( "Unable to connect to the database %r. Errormessage was: %s\n" % ( dbname, str(ex) ) )
+       return None, None
+
     c = conn.cursor()
 
     for tag in tags:
