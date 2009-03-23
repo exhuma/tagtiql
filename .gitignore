@@ -2,3 +2,4 @@
 *.pyo
 swarmtags.sqlite3
 *~
+.*.swp

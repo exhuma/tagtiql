@@ -28,6 +28,12 @@ help:
 
 clean:
 	-rm -rf build/*
+	-rm -rf sources
+	-rm -rf static
+	-rm *.html
+	-rm objects.inv
+	-rm searchindex.js
+
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) .
