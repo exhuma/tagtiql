@@ -7,6 +7,7 @@ root = sys.argv[1]
 
 def do_search(event):
     input = event.widget.get()
+    listbox.delete(0, END)
     if input:
         tags = [ x.strip() for x in input.split(',') ]
         searcher = fast_search( root, tags )
