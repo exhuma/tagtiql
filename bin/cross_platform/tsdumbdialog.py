@@ -6,7 +6,7 @@ from tagswarm.core import tag_path
 filename = sys.argv[1]
 
 root = Tk()
-root.withdraw()
+#root.withdraw()
 
 input = askstring("Swarmtags", "Enter a comma separated list of tags:")
 
