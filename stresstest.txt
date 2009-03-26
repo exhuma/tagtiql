@@ -1,0 +1,13 @@
+Test environment:
+   # Directories : 37579
+   # Files       : 305364
+   CPU           : Intel(R) Core(TM)2 Duo CPU T5250  @ 1.50GHz
+   MemTotal      : 2071648 kB
+
+
+"Cold"-Scanning the whole machine (i.e. scanning recursively on "/") with one tag
+tttag.py / speedtest 2> /dev/null  70.02s user 56.89s system 13% cpu 15:44.33 total
+
+"Warm"-Scanning the whole machine (i.e. scanning recursively on "/") with one tag
+tttag.py / warmtagging 2> /dev/null  65.59s user 51.33s system 14% cpu 13:03.21 total
+
