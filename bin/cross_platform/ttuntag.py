@@ -2,7 +2,7 @@
 
 import sys
 from glob import glob
-from tagswarm.core import tag_path, OP_REMOVE_TAG
+from tagtickle.core import tag_path, OP_REMOVE_TAG
 
 if (len(sys.argv) < 3):
    print """

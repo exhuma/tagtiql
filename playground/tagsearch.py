@@ -3,7 +3,7 @@ from PyQt4 import QtGui, QtCore
 import sys
 from os import walk, getcwd
 from os.path import join, exists, dirname
-from tagswarm import init_db
+from tagtickle import init_db
 from sqlite3 import connect, IntegrityError
 LOCALCACHE = "swarm_cache.sqlite3"
 
