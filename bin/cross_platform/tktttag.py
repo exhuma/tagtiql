@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from Tkinter import Tk
 from tkSimpleDialog import askstring
 import sys
