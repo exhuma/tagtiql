@@ -121,6 +121,49 @@ def tag_path(path, tags, op=OP_ADD_TAG):
     c.close()
     return tags, dbname
 
+def collect_tags(path):
+    """
+    Retrieves a list of tags available at a given location
+
+    The paths are returned as a tuple containing the tag name and the number of
+    ocurrences of that path
+    """
+    tags = {}
+    for root, dirs, files in walk(path):
+        # we only consider the tag store file for processing
+        if "swarmtags.sqlite3" not in files:
+            continue
+
+        # if we came this far, we know that the tag store file is in the
+        # current folder, so we can open it
+
+        dbname = join( root, "swarmtags.sqlite3" )
+        connection = None
+        try:
+           connection = connect( dbname )
+        except OperationalError, ex:
+           sys.stderr.write( "Unable to connect to the database %r. Errormessage was: %s\n" % ( dbname, str(ex) ) )
+           return
+
+        # connecting should have been successful at this point
+        c = connection.cursor()
+        c.execute( "SELECT tag, COUNT(*) FROM file_tags GROUP BY tag" )
+        for tag, count in c:
+            if tag not in tags:
+                tags[tag] = count
+            else:
+                tags[tag] += count
+        c.close()
+        connection.close()
+
+        # Next, we can remove the unwanted folders from the search
+        for ignored_folder in IGNORED_FOLDERS:
+            if ignored_folder in dirs:
+                dirs.remove(ignored_folder)  # don't visit CVS directories
+
+    return tags
+
+
 if __name__ == "__main__":
     import sys
     op = int(sys.argv[2])

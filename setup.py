@@ -14,6 +14,7 @@ setup(name='tagtickle',
       'bin/cross_platform/tktttag.py',
       'bin/cross_platform/ttquery.py',
       'bin/cross_platform/tttag.py',
+      'bin/cross_platform/ttcollect.py',
       'bin/cross_platform/ttuntag.py',
       ]
    )
