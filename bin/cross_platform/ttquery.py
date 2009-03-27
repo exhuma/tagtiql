@@ -2,7 +2,7 @@
 
 import sys
 from os import walk, getcwd
-from tagtickle.core import fast_search
+from tagtiql.core import fast_search
 
 if (len(sys.argv) < 2):
    print """

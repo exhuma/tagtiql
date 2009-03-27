@@ -2,7 +2,7 @@
 from Tkinter import Tk
 from tkSimpleDialog import askstring
 import sys
-from tagtickle.core import tag_path
+from tagtiql.core import tag_path
 
 filename = sys.argv[1]
 

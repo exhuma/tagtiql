@@ -2,7 +2,7 @@
 from Tkinter import *
 from tkSimpleDialog import askstring
 import sys
-from tagtickle.core import fast_search
+from tagtiql.core import fast_search
 
 root = sys.argv[1]
 

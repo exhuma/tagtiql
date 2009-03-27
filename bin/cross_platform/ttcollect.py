@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from tagtickle.core import collect_tags
+from tagtiql.core import collect_tags
 from os import getcwd
 from os.path import abspath
 

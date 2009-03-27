@@ -2,7 +2,7 @@
 
 import sys
 from glob import glob
-from tagtickle.core import tag_path
+from tagtiql.core import tag_path
 
 if (len(sys.argv) < 3):
    print """
