@@ -1,0 +1,64 @@
+<ui version="4.0" >
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Tagtiql Browser</string>
+  </property>
+  <widget class="QWidget" name="centralwidget" >
+   <layout class="QVBoxLayout" name="verticalLayout" >
+    <item>
+     <widget class="QSplitter" name="splitter" >
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QTreeWidget" name="twTags" >
+       <column>
+        <property name="text" >
+         <string>Tag</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Count</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QTreeWidget" name="twFiles" >
+       <column>
+        <property name="text" >
+         <string>Filename</string>
+        </property>
+       </column>
+       <column>
+        <property name="text" >
+         <string>Last Modified</string>
+        </property>
+       </column>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar" >
+   <property name="geometry" >
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar" />
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
